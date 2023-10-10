@@ -5,7 +5,9 @@
     <nav class="navbar navbar-default">
     <div class="container-fluid">
         <div class="navbar-header">
-        <a class="navbar-brand" href="/">logo</a>
+        <a class="navbar-brand" href="/">
+            <img style="height: 20px;" src="https://i.ibb.co/xKbzN0N/490091-1.png">   
+        </a>
         </div>
         <ul class="nav navbar-nav">
         <li class="active"><a href="#">Product</a></li>
@@ -17,10 +19,3 @@
 
 @endsection
 
-<!-- @section('scripts')
-<script>
-    @if(session('X-Alert-Open-File'))
-        alert('File downloaded successfully. Please check your downloads folder.');
-    @endif
-</script>
-@endsection -->

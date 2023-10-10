@@ -4,91 +4,69 @@ namespace App\Http\Controllers;
 
 use App\Exports\ExportProduct;
 use App\Models\Product;
+use App\Models\User;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Redirect;
-use Illuminate\Support\Facades\Response;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
 use Maatwebsite\Excel\Facades\Excel;
 
 class ProductController extends Controller
 {
+
+    public const SUB_END_POINT = 'admin/api/';
+
+    public const PRODUCT_END_POINT = 'products.json';
+
     /**
      * Display a listing of the resource.
      *
      * @return \Illuminate\Http\Response
      */
-    public function index()
+    public function index(Request $request, $auto=false)
     {
-        //
+        $user = User::first();
+        $date = $this->getCreatedAtAttribute($user->created_at);
+        $url = Product::SUB_END_POINT . $date . '/' . Product::PRODUCT_END_POINT;
+
+        $response = $user->api()->rest('GET', $url);
+        $products = $response['body']->container['products'];
+
+        foreach ($products as $product) { 
+            $check_product = Product::where('shopify_product_id',$product['id']);
+
+            if (!$check_product->exists()) {
+                Product::create([
+                    'title' => $product['title'],
+                    'body_html' => $product['body_html'] ? substr($product['body_html'], 0, 201)  : '',
+                    'vendor' => $product['vendor'],
+                    'shopify_product_id' => $product['id'],
+                    'product_type' => $product['product_type'],
+                    'type_sync' => $auto ? Product::TYPE_SYNC['AUTO'] : Product::TYPE_SYNC['MANUAL'],
+                    'time_sync' => Carbon::now(),
+                    'user_id' => $user->id
+                ]);
+            }
+        }
+
+        $products = Product::orderBy('id','desc')->paginate(10);
+
+        return view('welcome', compact('products'));
     }
 
-    /**
-     * Show the form for creating a new resource.
-     *
-     * @return \Illuminate\Http\Response
-     */
-    public function create()
+    public function getAll(Request $request)
     {
-        //
+        if (!is_null(Auth::user())) {
+            $products = Product::where('user_id', Auth::user()->id)->orderBy('id', 'desc')->paginate(10);
+
+            return view('welcome', compact('products'));
+        }else {
+            $products = Product::orderBy('id', 'desc')->paginate(10);
+            return view('welcome', compact('products'));
+        }
     }
 
-    /**
-     * Store a newly created resource in storage.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @return \Illuminate\Http\Response
-     */
-    public function store(Request $request)
-    {
-        //
-    }
-
-    /**
-     * Display the specified resource.
-     *
-     * @param  \App\Models\Product  $product
-     * @return \Illuminate\Http\Response
-     */
-    public function show(Product $product)
-    {
-        //
-    }
-
-    /**
-     * Show the form for editing the specified resource.
-     *
-     * @param  \App\Models\Products  $products
-     * @return \Illuminate\Http\Response
-     */
-    public function edit(Product $products)
-    {
-        //
-    }
-
-    /**
-     * Update the specified resource in storage.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @param  \App\Models\Products  $products
-     * @return \Illuminate\Http\Response
-     */
-    public function update(Request $request, Product $products)
-    {
-        //
-    }
-
-    /**
-     * Remove the specified resource from storage.
-     *
-     * @param  \App\Models\Products  $products
-     * @return \Illuminate\Http\Response
-     */
-    public function destroy(Product $products)
-    {
-        //
-    }
-
-    public function exportCSVFile() 
+    public function exportCSVFile(Request $request) 
     {
         try {
             $file = Excel::download(new ExportProduct , 'Products.csv');
@@ -112,5 +90,17 @@ class ProductController extends Controller
             return $th->getMessage();
         }
 
-    } 
+    }
+
+    public function getCreatedAtAttribute($date)
+    {
+        return Carbon::createFromFormat('Y-m-d H:i:s', $date)->format('Y-m');
+    }
+
+    public function show()
+    {
+        $user = User::first();
+  
+        return response()->json($user);
+    }
 }
