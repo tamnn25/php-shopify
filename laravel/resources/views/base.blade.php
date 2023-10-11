@@ -12,8 +12,6 @@
 <body>
     <header>
         <!-- Your header content here -->
-        <script src="jquery-3.3.1.min.js"></script>
-        <script src="https://cdnjs.cloudflare.com/ajax/libs/sweetalert/2.1.2/sweetalert.min.js"></script>
     </header>
 
     <main>
@@ -25,20 +23,9 @@
     </footer>
 
     <script src="{{ asset('js/app.js') }}"></script>
-    @yield('scripts')
 </body>
 <script type="text/javascript">
 
-$(document).ready(function(){
-
-  swal({
-    position: "top-end",
-    type: "success",
-    title: "Your work has been saved",
-    showConfirmButton: false,
-    timer: 1500
-  })
-});
 
 </script>
 

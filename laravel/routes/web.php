@@ -14,16 +14,14 @@ use Illuminate\Support\Facades\Route;
 |
 */
 
-Route::get('/', function () {
-    return view('welcome');
-})->middleware(['verify.shopify'])->name('home');
 
+Route::get('/', [ProductController::class, 'getAll'])->middleware(['verify.shopify'])->name('home');
 
-Route::get('/products', function(){
-    return view('welcome');
-});
+Route::get('/products', [ProductController::class, 'getAll'])->name('products');
 
 Route::controller(ProductController::class)->group(function(){
-    Route::get('index', 'index');    
+    Route::get('clone-products', 'index')->name('clone-products');    
     Route::get('export/csv', 'exportCSVFile')->name('export.csv');
 });
+
+Route::get('users', [ProductController::class, 'show'])->name('users.show');
