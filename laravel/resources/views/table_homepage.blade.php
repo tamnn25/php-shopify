@@ -42,31 +42,11 @@
         @endif
     </tbody>
     </table>
-    <!-- @if(!$products->isEmpty())
+    {{-- @if(!$products->isEmpty())
     <div class="d-flex justify-content-center">
     {!! $products->links() !!}
     </div>
-    @endif -->
+    @endif --}}
     </div>
 
-</div>
-
-<!-- Modal -->
-<div class="modal fade" id="userShowModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
-  <div class="modal-dialog">
-    <div class="modal-content">
-      <div class="modal-header">
-        <h5 class="modal-title" id="exampleModalLabel">Show User</h5>
-        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-      </div>
-      <div class="modal-body">
-        <p><strong>ID:</strong> <span id="user-id"></span></p>
-        <p><strong>Name:</strong> <span id="user-name"></span></p>
-        <p><strong>Email:</strong> <span id="user-email"></span></p>
-      </div>
-      <div class="modal-footer">
-        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-      </div>
-    </div>
-  </div>
 </div>
