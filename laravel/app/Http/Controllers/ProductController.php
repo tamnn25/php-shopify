@@ -97,10 +97,10 @@ class ProductController extends Controller
         return Carbon::createFromFormat('Y-m-d H:i:s', $date)->format('Y-m');
     }
 
-    public function show()
+    public function getProduct()
     {
-        $user = User::first();
+        $product = Product::all();
   
-        return response()->json($user);
+        return response()->json($product);
     }
 }
