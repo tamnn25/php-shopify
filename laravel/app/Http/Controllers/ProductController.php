@@ -51,18 +51,17 @@ class ProductController extends Controller
 
         $products = Product::orderBy('id','desc')->paginate(10);
 
-        return view('welcome', compact('products'));
+        return redirect('/ajax-table');
     }
 
     public function getAll(Request $request)
     {
         if (!is_null(Auth::user())) {
-            $products = Product::where('user_id', Auth::user()->id)->orderBy('id', 'desc')->paginate(10);
+            $products = Product::where('user_id', Auth::user()->id)->orderBy('id', 'desc')->get();
 
-            return view('welcome', compact('products'));
+            return redirect('/ajax-table');
         }else {
-            $products = Product::orderBy('id', 'desc')->paginate(10);
-            return view('welcome', compact('products'));
+            return redirect('/ajax-table');
         }
     }
 
@@ -97,10 +96,16 @@ class ProductController extends Controller
         return Carbon::createFromFormat('Y-m-d H:i:s', $date)->format('Y-m');
     }
 
-    public function getProduct()
+    public function getProduct(Request $request)
     {
-        $product = Product::all();
-  
-        return response()->json($product);
+        $page = $request->input('page', 1);
+        $perPage = $request->input('per_page', 10);
+
+        $products = Product::orderBy('id', 'desc')->paginate($perPage);
+
+        return response()->json([
+            'products' => $products->items(),
+            'total_records' => $products->total(),
+        ]);
     }
 }

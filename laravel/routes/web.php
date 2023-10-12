@@ -24,4 +24,8 @@ Route::controller(ProductController::class)->group(function(){
     Route::get('export/csv', 'exportCSVFile')->name('export.csv');
 });
 
-Route::get('users', [ProductController::class, 'show'])->name('users.show');
+Route::get('/api/products', [ProductController::class, 'getProduct'])->name('getProduct');
+
+Route::get('/ajax-table', function(){
+    return view('ajax.home_ajax');
+});
