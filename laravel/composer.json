@@ -6,13 +6,14 @@
     "license": "MIT",
     "require": {
         "php": "^8.0.2",
+        "falahati/php-mp3": "dev-master",
         "guzzlehttp/guzzle": "^7.2",
         "laravel/framework": "^9.19",
         "laravel/sanctum": "^3.0",
         "laravel/tinker": "^2.7",
         "maatwebsite/excel": "3.1.48",
-        "osiset/basic-shopify-api": "^10.0",
-        "osiset/laravel-shopify": "^17.3"
+        "pbmedia/laravel-ffmpeg": "^8.2",
+        "php-ffmpeg/php-ffmpeg": "^1.1"
     },
     "require-dev": {
         "fakerphp/faker": "^1.9.1",

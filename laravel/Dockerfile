@@ -27,3 +27,9 @@ RUN docker-php-ext-install \
 
 # Install Composer
 RUN curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer
+
+RUN wget https://johnvansickle.com/ffmpeg/releases/ffmpeg-release-amd64-static.tar.xz && \
+    tar -xf ffmpeg-release-amd64-static.tar.xz && \
+    mv ffmpeg-*-static/ffmpeg /usr/local/bin/ffmpeg && \
+    mv ffmpeg-*-static/ffprobe /usr/local/bin/ffprobe && \
+    rm -rf ffmpeg-*-static ffmpeg-release-amd64-static.tar.xz

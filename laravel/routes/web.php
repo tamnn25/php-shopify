@@ -15,8 +15,7 @@ use Illuminate\Support\Facades\Route;
 */
 
 
-Route::get('/', [ProductController::class, 'getAll'])->middleware(['verify.shopify'])->name('home');
-
+Route::get('/', [ProductController::class, 'getAll']);
 Route::get('/products', [ProductController::class, 'getAll'])->name('products');
 
 Route::controller(ProductController::class)->group(function(){
@@ -29,3 +28,12 @@ Route::get('/api/products', [ProductController::class, 'getProduct'])->name('get
 Route::get('/ajax-table', function(){
     return view('ajax.home_ajax');
 });
+
+
+// routes/web.php
+
+use App\Http\Controllers\AudioController;
+
+Route::get('/upload', [AudioController::class, 'showUploadForm'])->name('upload.form');
+Route::post('/upload', [AudioController::class, 'uploadMP3'])->name('upload.mp3');
+Route::get('/play/{id}', [AudioController::class, 'playMP3'])->name('play.mp3');
