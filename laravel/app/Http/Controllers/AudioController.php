@@ -23,7 +23,7 @@ class AudioController extends Controller
             $user = User::find(1); // Get the currently authenticated user
             $fileName = time() . '.' . $request->file('mp3_file')->getClientOriginalExtension();
             $filePath = $request->file('mp3_file')->storeAs('uploads/' . $user->id, $fileName, 'public');
-    
+
             // You might want to associate this file with the user in the database
             $user->audio()->create([
                 'path_mp3' => $filePath,
@@ -36,7 +36,7 @@ class AudioController extends Controller
 
         return redirect()->back()->with('error', 'Invalid MP3 file or file upload failed.');
     }
-    
+
     public function showUploadForm()
     {
         $mp3Files = Audio::where('user_id', 1)->get();
@@ -44,57 +44,49 @@ class AudioController extends Controller
         return view('upload', ['mp3Files' => $mp3Files]);
     }
 
-    public function playMP3TestMerge($id)
+    public function playMP3MergeMultiFile($id): bool
     {
-        $audioFiles = [
-            'storage/uploads/1/1701941708.mp3',
-            'storage/uploads/1/1701941805.mp3',
-        ];
+        $user = User::find(1);
+
+        $audioFiles = [];
+        foreach ($user->audio as $value) {
+            $audioFiles[] = "storage/" . $value->path_mp3;
+        }
+
         $outputFile = 'storage/uploads/1/' . Str::random(10) . '.mp3';
 
         $mergedFile = $this->mergeAudioFiles($audioFiles, $outputFile);
 
-        $fileContents = Storage::get($mergedFile);
+        $audio = new Audio();
+        $audio->path_mp3 = str_replace('storage/', '', $outputFile);
+        $audio->user_id = 1;
+        $audio->time_start = 0;
+        $audio->time_end = 1;
+        // Set other attributes as needed
+        $audio->save();
+
         \Log::info('File path before Storage::get: ' . $mergedFile);
-
-
         return true;
     }
 
     public function mergeAudioFiles($audioFiles, $outputFile)
     {
-        $audioFiles = [
-            'storage/uploads/1/1701941708.mp3',
-            'storage/uploads/1/1701941805.mp3',
-        ];
-        
-        $outputFile = 'storage/uploads/1/concatenated.mp3';
-
-        // Ensure full paths
-        $ffmpegBinary = '/usr/local/bin/ffmpeg'; // Update this with the correct path to your ffmpeg binary
-        $outputFileFullPath = storage_path($outputFile); // Ensure full path for output file
-
         // Create a list of input files for FFmpeg
         $inputFiles = implode('|', $audioFiles);
-
-        // Construct the FFmpeg command
-        $command = "$ffmpegBinary -i 'concat:$inputFiles' -c copy \"$outputFileFullPath\"";
+        $command = "ffmpeg -i 'concat:$inputFiles' -c copy \"$outputFile\"";
 
         // Run the FFmpeg command
         $process = Process::fromShellCommandline($command);
 
         try {
-            $process->mustRun();
-            echo $process->getOutput();
+            $process->run();
+            Log::info($process->getOutput());
         } catch (ProcessFailedException $exception) {
-            echo $exception->getMessage();
-            dd($process->getErrorOutput());
-            dd($exception->getMessage());
-            echo $process->getErrorOutput(); // Display error output for debugging
+            Log::info($exception->getMessage());
         }
     }
 
-    public function playMP3($id)
+    public function playMP3Test($id): bool
     {
         $audio = Audio::find($id);
 
@@ -118,22 +110,57 @@ class AudioController extends Controller
         $fileContents = Storage::get($outputFile);
         \Log::info('File path before Storage::get: ' . $outputFile);
 
-        // $audio1 = \falahati\PHPMP3\MpegAudio::fromFile($audioFile1)->stripTags();
-        // $audio2 = \falahati\PHPMP3\MpegAudio::fromFile($audioFile2)->stripTags();
-        // $out =  $audio1->append($audio2)->saveFile("3.mp3");
-
-
         $duration = trim($process->getOutput());
 
         // Extract start and end times
-        $start = 0; // Start time in seconds
         $end = $duration; // End time in seconds
         $audio = new Audio();
         $audio->path_mp3 = str_replace('storage/', '', $outputFile);
         $audio->user_id = 1;
-        $audio->time_start = 0;
+        $audio->time_start = 5;
         $audio->time_end = $end;
         // Set other attributes as needed
+        $audio->save();
+
+        return true;
+    }
+
+    public function mergeFileMP3()
+    {
+        $urls = [
+            "https://samplelib.com/lib/preview/mp3/sample-12s.mp3",
+            "https://samplelib.com/lib/preview/mp3/sample-15s.mp3",
+            "https://file-examples.com/storage/febf69dcf3656dfd992b0fa/2017/11/file_example_MP3_5MG.mp3"
+        ];
+
+        $downloadedFiles = [];
+
+        foreach ($urls as $url) {
+            $fileContents = file_get_contents($url);
+            $fileName = basename($url);
+            $filePath = "temp/$fileName";
+
+            Storage::disk('local')->put($filePath, $fileContents);
+            $downloadedFiles[] = storage_path("app/$filePath");
+        }
+
+        $inputFiles = implode('|', $downloadedFiles);
+        $outputFile = 'merged/merged_audio' . Str::random(10) . '.mp3';
+
+        $outputFilePath = Storage::disk('public')->path($outputFile);
+        $command = "ffmpeg -i 'concat:$inputFiles' -c copy \"$outputFilePath\"";
+        exec($command);
+
+        foreach ($downloadedFiles as $file) {
+            Storage::disk('local')->delete($file);
+        }
+
+        $audio = new Audio();
+        $audio->path_mp3 = $outputFile;
+        $audio->user_id = 1;
+        $audio->time_start = 0;
+        $audio->time_end = 1;
+
         $audio->save();
 
         return true;

@@ -17,6 +17,7 @@ class DatabaseSeeder extends Seeder
      */
     public function run()
     {
+        DB::table('users')->truncate();
         $faker = Faker::create();
 
         foreach (range(1, 10) as $index) {

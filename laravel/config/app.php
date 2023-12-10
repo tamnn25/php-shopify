@@ -183,6 +183,7 @@ return [
         Illuminate\View\ViewServiceProvider::class,
 
         ProtoneMedia\LaravelFFMpeg\Support\ServiceProvider::class,
+        Laravel\Passport\PassportServiceProvider::class,
         /*
          * Package Service Providers...
          */
